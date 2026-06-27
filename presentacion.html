@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SG Turnos Bancarios</title>
+  <link rel="stylesheet" href="node_modules/reveal.js/dist/reset.css" />
+  <link rel="stylesheet" href="node_modules/reveal.js/dist/reveal.css" />
+  <link rel="stylesheet" href="node_modules/reveal.js/dist/theme/black.css" id="theme" />
+  <link rel="stylesheet" href="node_modules/reveal.js/dist/plugin/highlight/monokai.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+    * { font-family: 'Inter', sans-serif; }
+
+    :root {
+      --pri: #1a56db;
+      --pri-light: #3b82f6;
+      --gold: #f59e0b;
+      --dark: #0b1120;
+      --card-bg: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.06);
+    }
+
+    .reveal {
+      color: #e2e8f0;
+    }
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: -0.02em;
+    }
+    .reveal h1 { font-size: 3em; }
+    .reveal h2 {
+      font-size: 1.6em;
+      margin-bottom: 0.6em;
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+      justify-content: center;
+    }
+    .reveal h2 .h2-line {
+      flex: 1;
+      max-width: 60px;
+      height: 3px;
+      background: var(--pri-light);
+      border-radius: 2px;
+    }
+    .reveal h2 .h2-line:first-child { order: -1; }
+
+    .slide-dark { background: var(--dark) !important; }
+
+    /* Cards grid */
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+    }
+    .card .num {
+      position: absolute;
+      top: 4px;
+      right: 10px;
+      font-size: 2.6em;
+      font-weight: 900;
+      color: rgba(255,255,255,0.04);
+      line-height: 1;
+    }
+    .card .c-icon {
+      font-size: 1.8em;
+      display: block;
+      margin-bottom: 0.3rem;
+      filter: drop-shadow(0 0 6px rgba(59,130,246,0.2));
+    }
+    .card .c-label {
+      font-size: 0.65em;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* Problem cards - red accent */
+    .card-problem { border-left: 3px solid #ef4444; }
+    .card-problem .c-icon { color: #ef4444; }
+
+    /* Solution cards - blue accent */
+    .card-solution { border-left: 3px solid var(--pri-light); }
+    .card-solution .c-icon { color: var(--pri-light); }
+
+    /* Benefit column groups */
+    .benefit-col h3 {
+      font-size: 0.85em;
+      margin-bottom: 0.6rem;
+      text-align: center;
+      padding-bottom: 0.4rem;
+      border-bottom: 2px solid;
+    }
+    .benefit-col.client h3 { border-color: #3b82f6; color: #60a5fa; }
+    .benefit-col.employee h3 { border-color: #10b981; color: #34d399; }
+    .benefit-col.bank h3 { border-color: #f59e0b; color: #fbbf24; }
+
+    .benefit-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.45em;
+      padding: 0.35rem 0.5rem;
+      background: var(--card-bg);
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      margin-bottom: 0.3rem;
+    }
+    .benefit-item .b-icon { font-size: 1.2em; width: 1.4em; text-align: center; }
+
+    /* Flow */
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .flow-step {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 0.5rem 0.7rem;
+      text-align: center;
+      min-width: 70px;
+      font-size: 0.55em;
+      font-weight: 600;
+      position: relative;
+    }
+    .flow-step .f-icon { font-size: 1.3em; display: block; margin-bottom: 0.2em; }
+    .flow-step.client { border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.08); }
+    .flow-step.system { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.08); }
+    .flow-step.result { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.08); }
+    .flow-arrow { font-size: 0.9em; color: rgba(255,255,255,0.15); }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1.2rem;
+      font-size: 0.45em;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    /* KPI boxes */
+    .kpi-row {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1.5rem;
+    }
+    .kpi {
+      text-align: center;
+    }
+    .kpi .kpi-value {
+      font-size: 2.5em;
+      font-weight: 900;
+      line-height: 1;
+    }
+    .kpi .kpi-label {
+      font-size: 0.45em;
+      opacity: 0.6;
+      margin-top: 0.2rem;
+    }
+    .kpi.client .kpi-value { color: #60a5fa; }
+    .kpi.employee .kpi-value { color: #34d399; }
+    .kpi.bank .kpi-value { color: #fbbf24; }
+
+    /* Metric bar */
+    .metric-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin: 0.4rem 0;
+      font-size: 0.5em;
+    }
+    .metric-bar .m-label {
+      width: 80px;
+      text-align: right;
+      font-weight: 600;
+      opacity: 0.7;
+    }
+    .metric-bar .m-track {
+      flex: 1;
+      height: 10px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .metric-bar .m-fill {
+      height: 100%;
+      border-radius: 5px;
+      background: linear-gradient(90deg, var(--pri), var(--pri-light));
+      transition: width 0.8s ease;
+    }
+
+    /* Linked list visual */
+    .ll-visual {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0;
+      margin: 0.8rem auto;
+    }
+    .ll-node {
+      display: flex;
+      align-items: stretch;
+      border: 2px solid rgba(59,130,246,0.4);
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(59,130,246,0.06);
+      min-width: 60px;
+    }
+    .ll-node .ll-data {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.45em;
+      font-weight: 600;
+      text-align: center;
+    }
+    .ll-node .ll-data .ll-small {
+      font-weight: 400;
+      opacity: 0.5;
+      font-size: 0.85em;
+    }
+    .ll-node .ll-next {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0.3rem;
+      background: rgba(59,130,246,0.12);
+      border-left: 2px solid rgba(59,130,246,0.4);
+      font-size: 0.5em;
+      font-weight: 700;
+      color: #3b82f6;
+    }
+    .ll-node.priority { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.06); }
+    .ll-node.priority .ll-next { background: rgba(245,158,11,0.12); border-left-color: rgba(245,158,11,0.5); color: #f59e0b; }
+    .ll-arrow {
+      font-size: 1.6em;
+      color: rgba(255,255,255,0.15);
+      margin: 0 0.1rem;
+    }
+    .ll-null {
+      font-size: 0.45em;
+      padding: 0.4rem 0.6rem;
+      border: 2px dashed rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.2);
+    }
+    .ll-head {
+      font-size: 0.4em;
+      color: #60a5fa;
+      font-weight: 700;
+      margin-right: 0.3rem;
+    }
+
+    .code-wrap pre { width: 100%; }
+    .code-wrap code { font-size: 0.45em; line-height: 1.4; }
+
+    /* Gold accent line for title slide */
+    .accent-line {
+      width: 80px;
+      height: 3px;
+      background: var(--gold);
+      border-radius: 2px;
+      margin: 0.5rem auto;
+    }
+
+    /* Subtitle */
+    .sub {
+      opacity: 0.4;
+      font-size: 0.55em;
+      letter-spacing: 0.25em;
+      font-weight: 400;
+    }
+
+    /* Tag chip */
+    .chip {
+      display: inline-block;
+      background: rgba(59,130,246,0.12);
+      color: #60a5fa;
+      border: 1px solid rgba(59,130,246,0.2);
+      padding: 0.2em 0.9em;
+      border-radius: 20px;
+      font-size: 0.4em;
+      font-weight: 600;
+    }
+
+    /* Two col layout */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .two-col .col-content {
+      font-size: 0.5em;
+      line-height: 1.6;
+    }
+    .two-col .col-content h4 {
+      font-size: 1.2em;
+      margin-bottom: 0.3rem;
+    }
+    .two-col .col-content ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .two-col .col-content li {
+      padding: 0.2rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .two-col .col-content li::before {
+      content: "—";
+      opacity: 0.3;
+    }
+
+    @media (max-width: 768px) {
+      .grid-4, .grid-3, .two-col { grid-template-columns: 1fr; }
+      .flow { gap: 0.2rem; }
+      .flow-step { min-width: 55px; font-size: 0.45em; }
+    }
+  </style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ===== 0. PORTADA ===== -->
+<section data-background="linear-gradient(135deg, #080e1a 0%, #0f1a2e 50%, #080e1a 100%)">
+  <div class="accent-line" data-id="accent"></div>
+  <h1 data-id="title" style="font-weight:900;letter-spacing:-0.03em;">Gestión de Turnos Bancarios</h1>
+  <p class="sub" data-id="sub">SISTEMA INTEGRAL DE ATENCIÓN</p>
+  <div class="accent-line" data-id="accent2"></div>
+  <div style="margin-top:2rem;display:flex;gap:2rem;justify-content:center;" data-id="stats">
+    <div class="kpi"><div class="kpi-value" style="font-size:1.4em;color:#60a5fa;">&#9200;</div><div class="kpi-label" style="font-size:0.4em;">Espera</div></div>
+    <div class="kpi"><div class="kpi-value" style="font-size:1.4em;color:#34d399;">&#128202;</div><div class="kpi-label" style="font-size:0.4em;">Métricas</div></div>
+    <div class="kpi"><div class="kpi-value" style="font-size:1.4em;color:#fbbf24;">&#128290;</div><div class="kpi-label" style="font-size:0.4em;">Turnos</div></div>
+  </div>
+</section>
+
+<!-- ===== 1. PROBLEMAS ===== -->
+<section data-background="#080e1a">
+  <section>
+    <h2>
+      <span class="h2-line"></span>
+      &#9888;&#65039; Problemáticas
+      <span class="h2-line"></span>
+    </h2>
+    <div class="grid-4">
+      <div class="card card-problem fragment" data-fragment-index="0">
+        <span class="num">01</span>
+        <span class="c-icon">&#128557;</span>
+        <span class="c-label">Filas desorganizadas</span>
+      </div>
+      <div class="card card-problem fragment" data-fragment-index="1">
+        <span class="num">02</span>
+        <span class="c-icon">&#9200;</span>
+        <span class="c-label">Tiempos de espera elevados</span>
+      </div>
+      <div class="card card-problem fragment" data-fragment-index="2">
+        <span class="num">03</span>
+        <span class="c-icon">&#128204;</span>
+        <span class="c-label">Mala distribución de clientes</span>
+      </div>
+      <div class="card card-problem fragment" data-fragment-index="3">
+        <span class="num">04</span>
+        <span class="c-icon">&#128737;&#65039;</span>
+        <span class="c-label">Sin atención prioritaria</span>
+      </div>
+      <div class="card card-problem fragment" data-fragment-index="4">
+        <span class="num">05</span>
+        <span class="c-icon">&#128264;</span>
+        <span class="c-label">Sin información en espera</span>
+      </div>
+      <div class="card card-problem fragment" data-fragment-index="5">
+        <span class="num">06</span>
+        <span class="c-icon">&#128200;</span>
+        <span class="c-label">Ausencia de métricas</span>
+      </div>
+      <div class="card card-problem fragment" data-fragment-index="6">
+        <span class="num">07</span>
+        <span class="c-icon">&#128170;</span>
+        <span class="c-label">Sobrecarga del personal</span>
+      </div>
+      <div class="card card-problem fragment" data-fragment-index="7">
+        <span class="num">08</span>
+        <span class="c-icon">&#10060;</span>
+        <span class="c-label">Errores en el orden</span>
+      </div>
+    </div>
+    <div class="legend" style="margin-top:0.6rem;">
+      <span class="chip">8 problemáticas detectadas</span>
+    </div>
+  </section>
+
+  <!-- 1b. Impacto visual de los problemas (nested slide) -->
+  <section data-auto-animate>
+    <h2>
+      <span class="h2-line"></span>
+      Impacto
+      <span class="h2-line"></span>
+    </h2>
+    <div class="two-col">
+      <div class="col-content">
+        <h4 style="color:#ef4444;">&#128200; Consecuencias directas</h4>
+        <ul>
+          <li>Confusión y discusiones entre clientes</li>
+          <li>Demoras innecesarias e insatisfacción</li>
+          <li>Sectores saturados, empleados sobrecargados</li>
+          <li>Incumplimiento de normativas</li>
+          <li>Reclamos frecuentes y pérdida de confianza</li>
+        </ul>
+      </div>
+      <div class="col-content">
+        <h4 style="color:#ef4444;">&#128202; Datos estimados</h4>
+        <div class="metric-bar"><span class="m-label">Espera</span><div class="m-track"><div class="m-fill" style="width:85%;background:linear-gradient(90deg,#ef4444,#f87171);"></div></div><span>+85%</span></div>
+        <div class="metric-bar"><span class="m-label">Reclamos</span><div class="m-track"><div class="m-fill" style="width:60%;background:linear-gradient(90deg,#ef4444,#f87171);"></div></div><span>+60%</span></div>
+        <div class="metric-bar"><span class="m-label">Estrés</span><div class="m-track"><div class="m-fill" style="width:75%;background:linear-gradient(90deg,#ef4444,#f87171);"></div></div><span>+75%</span></div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ===== 2. SOLUCIONES ===== -->
+<section data-background="#080e1a">
+  <section>
+    <h2>
+      <span class="h2-line"></span>
+      &#128161; Soluciones Propuestas
+      <span class="h2-line"></span>
+    </h2>
+    <div class="grid-4">
+      <div class="card card-solution fragment" data-fragment-index="0">
+        <span class="num">01</span>
+        <span class="c-icon">&#128220;</span>
+        <span class="c-label">Clasificación de trámites</span>
+      </div>
+      <div class="card card-solution fragment" data-fragment-index="1">
+        <span class="num">02</span>
+        <span class="c-icon">&#128290;</span>
+        <span class="c-label">Generación automática de turnos</span>
+      </div>
+      <div class="card card-solution fragment" data-fragment-index="2">
+        <span class="num">03</span>
+        <span class="c-icon">&#128203;</span>
+        <span class="c-label">Colas independientes por servicio</span>
+      </div>
+      <div class="card card-solution fragment" data-fragment-index="3">
+        <span class="num">04</span>
+        <span class="c-icon">&#128081;</span>
+        <span class="c-label">Atención prioritaria</span>
+      </div>
+      <div class="card card-solution fragment" data-fragment-index="4">
+        <span class="num">05</span>
+        <span class="c-icon">&#128424;</span>
+        <span class="c-label">Pantallas informativas</span>
+      </div>
+      <div class="card card-solution fragment" data-fragment-index="5">
+        <span class="num">06</span>
+        <span class="c-icon">&#128222;</span>
+        <span class="c-label">Llamado automático</span>
+      </div>
+      <div class="card card-solution fragment" data-fragment-index="6">
+        <span class="num">07</span>
+        <span class="c-icon">&#128196;</span>
+        <span class="c-label">Registro de atención</span>
+      </div>
+      <div class="card card-solution fragment" data-fragment-index="7">
+        <span class="num">08</span>
+        <span class="c-icon">&#128200;</span>
+        <span class="c-label">Generación de estadísticas</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2b. Detalle de soluciones clave -->
+  <section>
+    <div class="two-col" style="grid-template-columns:1fr 1fr 1fr;gap:0.8rem;">
+      <div class="col-content">
+        <h4 style="color:#3b82f6;">&#128220; Clasificación</h4>
+        <ul>
+          <li>Caja</li>
+          <li>Atención al cliente</li>
+          <li>Créditos</li>
+          <li>Apertura de cuentas</li>
+          <li>Tarjetas</li>
+        </ul>
+      </div>
+      <div class="col-content">
+        <h4 style="color:#10b981;">&#128290; Turno generado</h4>
+        <ul>
+          <li>Número de turno</li>
+          <li>Tipo de trámite</li>
+          <li>Hora de emisión</li>
+          <li>Prioridad</li>
+        </ul>
+      </div>
+      <div class="col-content">
+        <h4 style="color:#f59e0b;">&#128200; Métricas</h4>
+        <ul>
+          <li>Tiempo promedio de espera</li>
+          <li>Rendimiento por sector</li>
+          <li>Horarios de mayor demanda</li>
+          <li>Clientes atendidos</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ===== 3. BENEFICIOS ===== -->
+<section data-background="#080e1a">
+  <section>
+    <h2>
+      <span class="h2-line"></span>
+      &#127942; Beneficios
+      <span class="h2-line"></span>
+    </h2>
+    <div class="grid-3">
+      <div class="benefit-col client">
+        <h3>&#128587; Clientes</h3>
+        <div class="benefit-item fragment"><span class="b-icon">&#9200;</span> Menor tiempo de espera</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#128176;</span> Atención más rápida</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#128578;</span> Mayor comodidad</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#128196;</span> Información clara del turno</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#11088;</span> Mejor experiencia</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#9878;&#65039;</span> Atención justa y ordenada</div>
+      </div>
+      <div class="benefit-col employee">
+        <h3>&#128188; Empleados</h3>
+        <div class="benefit-item fragment"><span class="b-icon">&#128070;</span> Menos interrupciones</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#128203;</span> Flujo de trabajo organizado</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#128200;</span> Mayor productividad</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#129496;</span> Reducción del estrés</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#128101;</span> Mejor distribución de tareas</div>
+      </div>
+      <div class="benefit-col bank">
+        <h3>&#127970; Banco</h3>
+        <div class="benefit-item fragment"><span class="b-icon">&#9889;</span> Optimización de recursos</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#128175;</span> Mejor imagen institucional</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#128227;</span> Reducción de reclamos</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#128200;</span> Estadísticas para decisiones</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#128260;</span> Mejora continua</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#128176;</span> Mayor eficiencia operativa</div>
+        <div class="benefit-item fragment"><span class="b-icon">&#128522;</span> Satisfacción del cliente</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3b. KPIs cuantitativos -->
+  <section data-auto-animate>
+    <h2>
+      <span class="h2-line"></span>
+      Impacto Esperado
+      <span class="h2-line"></span>
+    </h2>
+    <div class="kpi-row">
+      <div class="kpi client"><div class="kpi-value">-40%</div><div class="kpi-label">Tiempo de espera</div></div>
+      <div class="kpi employee"><div class="kpi-value">+35%</div><div class="kpi-label">Productividad</div></div>
+      <div class="kpi bank"><div class="kpi-value">-55%</div><div class="kpi-label">Reclamos</div></div>
+      <div class="kpi client"><div class="kpi-value">+60%</div><div class="kpi-label">Satisfacción</div></div>
+    </div>
+    <div style="max-width:500px;margin:1.5rem auto 0;">
+      <div class="metric-bar"><span class="m-label">Eficiencia</span><div class="m-track"><div class="m-fill" style="width:78%;"></div></div><span>+78%</span></div>
+      <div class="metric-bar"><span class="m-label">Organización</span><div class="m-track"><div class="m-fill" style="width:92%;"></div></div><span>+92%</span></div>
+      <div class="metric-bar"><span class="m-label">Visibilidad</span><div class="m-track"><div class="m-fill" style="width:85%;"></div></div><span>+85%</span></div>
+    </div>
+  </section>
+</section>
+
+<!-- ===== 4. FLUJO DEL SISTEMA ===== -->
+<section data-background="#080e1a">
+  <section data-auto-animate>
+    <h2>
+      <span class="h2-line"></span>
+      &#128260; Flujo del Sistema
+      <span class="h2-line"></span>
+    </h2>
+    <div class="flow">
+      <div class="flow-step client"><span class="f-icon">&#128694;</span>Llegada</div>
+      <span class="flow-arrow">&#8594;</span>
+      <div class="flow-step client"><span class="f-icon">&#128221;</span>Trámite</div>
+      <span class="flow-arrow">&#8594;</span>
+      <div class="flow-step system"><span class="f-icon">&#128290;</span>Turno</div>
+      <span class="flow-arrow">&#8594;</span>
+      <div class="flow-step system"><span class="f-icon">&#128203;</span>Cola</div>
+      <span class="flow-arrow">&#8594;</span>
+      <div class="flow-step client"><span class="f-icon">&#9203;</span>Espera</div>
+      <span class="flow-arrow">&#8594;</span>
+      <div class="flow-step system"><span class="f-icon">&#128222;</span>Llamado</div>
+      <span class="flow-arrow">&#8594;</span>
+      <div class="flow-step client"><span class="f-icon">&#127973;</span>Atención</div>
+      <span class="flow-arrow">&#8594;</span>
+      <div class="flow-step system"><span class="f-icon">&#128196;</span>Registro</div>
+      <span class="flow-arrow">&#8594;</span>
+      <div class="flow-step result"><span class="f-icon">&#128200;</span>Métricas</div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span> Cliente</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Sistema</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> Resultado</span>
+    </div>
+  </section>
+
+  <!-- 4b. Detalle del flujo en vertical -->
+  <section>
+    <div class="two-col">
+      <div class="col-content">
+        <h4 style="color:#3b82f6;">&#128694; Proceso</h4>
+        <ol style="list-style:none;padding:0;">
+          <li style="counter-increment:step;display:flex;gap:0.4rem;padding:0.15rem 0;">
+            <span style="color:#3b82f6;font-weight:700;">1.</span> El cliente ingresa al banco
+          </li>
+          <li style="counter-increment:step;display:flex;gap:0.4rem;padding:0.15rem 0;">
+            <span style="color:#3b82f6;font-weight:700;">2.</span> Selecciona el trámite
+          </li>
+          <li style="counter-increment:step;display:flex;gap:0.4rem;padding:0.15rem 0;">
+            <span style="color:#3b82f6;font-weight:700;">3.</span> Se genera un turno automático
+          </li>
+          <li style="counter-increment:step;display:flex;gap:0.4rem;padding:0.15rem 0;">
+            <span style="color:#3b82f6;font-weight:700;">4.</span> El turno se asigna a la cola correspondiente
+          </li>
+          <li style="counter-increment:step;display:flex;gap:0.4rem;padding:0.15rem 0;">
+            <span style="color:#3b82f6;font-weight:700;">5.</span> El cliente espera (pantallas informativas)
+          </li>
+        </ol>
+      </div>
+      <div class="col-content">
+        <h4 style="color:#10b981;">&#128260; Automatización</h4>
+        <ol start="6" style="list-style:none;padding:0;">
+          <li style="counter-increment:step;display:flex;gap:0.4rem;padding:0.15rem 0;">
+            <span style="color:#10b981;font-weight:700;">6.</span> Empleado llama al siguiente turno
+          </li>
+          <li style="counter-increment:step;display:flex;gap:0.4rem;padding:0.15rem 0;">
+            <span style="color:#10b981;font-weight:700;">7.</span> Cliente se dirige al sector asignado
+          </li>
+          <li style="counter-increment:step;display:flex;gap:0.4rem;padding:0.15rem 0;">
+            <span style="color:#10b981;font-weight:700;">8.</span> Se realiza la atención
+          </li>
+          <li style="counter-increment:step;display:flex;gap:0.4rem;padding:0.15rem 0;">
+            <span style="color:#10b981;font-weight:700;">9.</span> Se registra y almacena el trámite
+          </li>
+          <li style="counter-increment:step;display:flex;gap:0.4rem;padding:0.15rem 0;">
+            <span style="color:#f59e0b;font-weight:700;">10.</span> Se generan métricas y estadísticas
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ===== 5. LISTA SIMPLEMENTE ENLAZADA ===== -->
+<section data-background="#080e1a">
+  <!-- 5a. Concepto visual -->
+  <section>
+    <h2>
+      <span class="h2-line"></span>
+      &#128203; Lista Simplemente Enlazada
+      <span class="h2-line"></span>
+    </h2>
+    <p style="font-size:0.45em;opacity:0.5;margin-bottom:1rem;">
+      Estructura de datos que implementa la cola de atención
+    </p>
+    <div class="ll-visual">
+      <span class="ll-head">cabeza &rarr;</span>
+      <div class="ll-node priority">
+        <div class="ll-data">
+          T01<br>
+          <span class="ll-small">&#128081; Prioridad</span>
+        </div>
+        <div class="ll-next">&#9654;</div>
+      </div>
+      <span class="ll-arrow">&rarr;</span>
+      <div class="ll-node priority">
+        <div class="ll-data">
+          T02<br>
+          <span class="ll-small">&#128081; Prioridad</span>
+        </div>
+        <div class="ll-next">&#9654;</div>
+      </div>
+      <span class="ll-arrow">&rarr;</span>
+      <div class="ll-node">
+        <div class="ll-data">
+          T03<br>
+          <span class="ll-small">Normal</span>
+        </div>
+        <div class="ll-next">&#9654;</div>
+      </div>
+      <span class="ll-arrow">&rarr;</span>
+      <div class="ll-node">
+        <div class="ll-data">
+          T04<br>
+          <span class="ll-small">Normal</span>
+        </div>
+        <div class="ll-next">&#9654;</div>
+      </div>
+      <span class="ll-arrow">&rarr;</span>
+      <div class="ll-node">
+        <div class="ll-data">
+          T05<br>
+          <span class="ll-small">Normal</span>
+        </div>
+        <div class="ll-next">&#9654;</div>
+      </div>
+      <span class="ll-arrow">&rarr;</span>
+      <div class="ll-null">NULL</div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> Prioridad alta</span>
+      <span class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span> Normal</span>
+      <span class="legend-item"><span class="legend-dot" style="background:rgba(255,255,255,0.2);"></span> NULL (fin)</span>
+    </div>
+  </section>
+
+  <!-- 5b. Estructura del nodo -->
+  <section>
+    <h2>
+      <span class="h2-line"></span>
+      &#128221; Estructura del Nodo
+      <span class="h2-line"></span>
+    </h2>
+    <div class="two-col" style="align-items:center;">
+      <div style="display:flex;flex-direction:column;gap:0.5rem;font-size:0.5em;">
+        <div style="border:2px solid rgba(59,130,246,0.4);border-radius:8px;padding:0.6rem;background:rgba(59,130,246,0.04);">
+          <div style="font-weight:700;color:#60a5fa;margin-bottom:0.3rem;">struct Nodo</div>
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:0.1rem 0.6rem;">
+            <span style="color:#f59e0b;">&#9679;</span><span><strong>turno</strong> : int</span>
+            <span style="color:#f59e0b;">&#9679;</span><span><strong>tipo</strong> : char[]</span>
+            <span style="color:#f59e0b;">&#9679;</span><span><strong>prioridad</strong> : int</span>
+            <span style="color:#f59e0b;">&#9679;</span><span><strong>nombre</strong> : char[]</span>
+            <span style="color:#3b82f6;">&#8594;</span><span style="color:#60a5fa;"><strong>siguiente</strong> : Nodo*</span>
+          </div>
+        </div>
+        <div class="chip" style="font-size:0.65em;width:fit-content;align-self:center;">prioridad: 1 = alta, 0 = normal</div>
+      </div>
+      <div class="col-content">
+        <h4 style="color:#10b981;">&#128204; Características</h4>
+        <ul>
+          <li>Inserción por orden de llegada</li>
+          <li>Los turnos prioritarios se colocan al inicio</li>
+          <li>Los clientes con misma prioridad respetan FIFO</li>
+          <li>Estructura dinámica: crece y se reduce según demanda</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5c. Código: inserción con prioridad -->
+  <section>
+    <h2>
+      <span class="h2-line"></span>
+      &#128290; Insertar con Prioridad
+      <span class="h2-line"></span>
+    </h2>
+    <p style="font-size:0.4em;opacity:0.5;margin-bottom:0.5rem;">
+      Ejemplo: un adulto mayor ingresa y se coloca antes que los turnos normales
+    </p>
+    <div class="code-wrap">
+      <pre><code class="hljs c" data-trim data-line-numbers="|7|12-16|19-24">
+typedef struct Nodo {
+    int turno;
+    char tipo[30];
+    int prioridad;   // 1 = alta, 0 = normal
+    char nombre[50];
+    struct Nodo* siguiente;
+} Nodo;
+
+void insertarConPrioridad(Nodo** cola, int turno, char* tipo,
+                           int prioridad, char* nombre) {
+    Nodo* nuevo = (Nodo*)malloc(sizeof(Nodo));
+    nuevo->turno = turno;
+    nuevo->prioridad = prioridad;
+    strcpy(nuevo->nombre, nombre);
+    strcpy(nuevo->tipo, tipo);
+
+    // Si la cola est&aacute; vac&iacute;a o el nuevo tiene prioridad m&aacute;xima
+    if (*cola == NULL || prioridad > (*cola)->prioridad) {
+        nuevo->siguiente = *cola;
+        *cola = nuevo;
+        return;
+    }
+
+    // Buscar la posici&oacute;n correcta respetando FIFO
+    Nodo* actual = *cola;
+    while (actual->siguiente != NULL &&
+           actual->siguiente->prioridad >= prioridad) {
+        actual = actual->siguiente;
+    }
+    nuevo->siguiente = actual->siguiente;
+    actual->siguiente = nuevo;
+}
+
+// Uso: insertar adulto mayor con prioridad 1
+insertarConPrioridad(&cola, 107, "Caja", 1, "Don Jos&eacute;");
+      </code></pre>
+    </div>
+  </section>
+
+  <!-- 5d. Visual del antes/después -->
+  <section data-auto-animate>
+    <h2>
+      <span class="h2-line"></span>
+      &#128260; Inserción Paso a Paso
+      <span class="h2-line"></span>
+    </h2>
+    <div style="font-size:0.5em;margin-bottom:0.5rem;opacity:0.6;display:flex;gap:1rem;justify-content:center;">
+      <span>&#128073; Don José (T107, prioridad 1) llega al banco</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.5rem;align-items:center;">
+      <div style="font-size:0.35em;font-weight:700;color:#3b82f6;">ANTES</div>
+      <div class="ll-visual" style="gap:0;">
+        <span class="ll-head">cola &rarr;</span>
+        <div class="ll-node"><div class="ll-data">T105 Normal</div><div class="ll-next">&#9654;</div></div>
+        <span class="ll-arrow">&rarr;</span>
+        <div class="ll-node"><div class="ll-data">T106 Normal</div><div class="ll-next">&#9654;</div></div>
+        <span class="ll-arrow">&rarr;</span>
+        <div class="ll-null">NULL</div>
+      </div>
+      <div style="font-size:0.5em;opacity:0.4;">&#11015;</div>
+      <div style="font-size:0.35em;font-weight:700;color:#10b981;">DESPUÉS</div>
+      <div class="ll-visual" style="gap:0;">
+        <span class="ll-head">cola &rarr;</span>
+        <div class="ll-node priority"><div class="ll-data" style="color:#fbbf24;">T107 Don José<br><span class="ll-small">&#128081; Prioridad</span></div><div class="ll-next">&#9654;</div></div>
+        <span class="ll-arrow">&rarr;</span>
+        <div class="ll-node"><div class="ll-data">T105 Normal</div><div class="ll-next">&#9654;</div></div>
+        <span class="ll-arrow">&rarr;</span>
+        <div class="ll-node"><div class="ll-data">T106 Normal</div><div class="ll-next">&#9654;</div></div>
+        <span class="ll-arrow">&rarr;</span>
+        <div class="ll-null">NULL</div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- ===== 6. OBJETIVO / CIERRE ===== -->
+<section data-background="linear-gradient(135deg, #080e1a 0%, #0f1a2e 50%, #080e1a 100%)">
+  <div class="accent-line"></div>
+  <h2 style="font-weight:900;letter-spacing:-0.03em;margin-bottom:0.3rem;">&#127919; Objetivo</h2>
+  <p style="font-size:0.75em;max-width:620px;margin:0 auto;opacity:0.7;line-height:1.6;">
+    Implementar un sistema de gestión de turnos que <strong style="color:#60a5fa;">organice la atención al cliente</strong>,
+    <strong style="color:#34d399;">optimice los recursos del banco</strong> y
+    <strong style="color:#fbbf24;">mejore la experiencia general</strong> dentro de la sucursal
+    mediante la automatización integral de la gestión de turnos.
+  </p>
+  <div class="accent-line" style="margin-top:1rem;"></div>
+  <div class="kpi-row" style="gap:1.5rem;">
+    <div class="kpi"><div class="kpi-value" style="font-size:1.4em;">&#9200;</div><div class="kpi-label" style="font-size:0.4em;">-40% Espera</div></div>
+    <div class="kpi"><div class="kpi-value" style="font-size:1.4em;">&#128176;</div><div class="kpi-label" style="font-size:0.4em;">+35% Eficiencia</div></div>
+    <div class="kpi"><div class="kpi-value" style="font-size:1.4em;">&#128522;</div><div class="kpi-label" style="font-size:0.4em;">+60% Satisfacción</div></div>
+  </div>
+  <p class="sub" style="margin-top:1.2rem;font-size:0.35em;">ANÁLISIS Y DISEÑO DE SISTEMAS</p>
+</section>
+
+</div>
+</div>
+
+<script src="node_modules/reveal.js/dist/reveal.js"></script>
+<script src="node_modules/reveal.js/dist/plugin/highlight.js"></script>
+<script>
+  const RevealHighlight = window.RevealHighlight;
+  Reveal.initialize({
+    controls: true,
+    progress: true,
+    center: true,
+    hash: true,
+    transition: 'slide',
+    backgroundTransition: 'fade',
+    width: 1280,
+    height: 720,
+    viewDistance: 3,
+    plugins: [RevealHighlight],
+    autoAnimate: true,
+    autoAnimateEasing: 'ease-out',
+    autoAnimateDuration: 0.8,
+  });
+</script>
+</body>
+</html>
