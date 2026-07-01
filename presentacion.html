@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval'; connect-src 'self' ws: wss:; img-src 'self' data:; font-src 'self' data: https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;" />
   <title>SG Turnos Bancarios</title>
   <link rel="stylesheet" href="node_modules/reveal.js/dist/reset.css" />
   <link rel="stylesheet" href="node_modules/reveal.js/dist/reveal.css" />
@@ -476,6 +477,62 @@
     .flow-v2 .f2-step.verify { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
     .flow-v2 .f2-step.attention { border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.06); }
 
+    /* Flow wrap - horizontal compacto */
+    .flow-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+      margin: 0.3rem auto 0;
+      max-width: 1100px;
+    }
+    .flow-wrap .fw-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+    .flow-wrap .fw-row2 {
+      padding-left: 12%;
+    }
+    .flow-wrap .fw-step {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 0.35rem 0.7rem;
+      font-size: 0.48em;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .flow-wrap .fw-step .fwi { width: 0.9em; height: 0.9em; flex-shrink: 0; display: block; }
+    .flow-wrap .fw-step .fws { font-size: 0.78em; opacity: 0.5; font-weight: 400; margin-left: 0.2rem; }
+    .flow-wrap .fw-arrow { font-size: 0.85em; color: rgba(255,255,255,0.2); line-height: 1; }
+    .flow-wrap .fw-connector {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.4rem;
+      width: 55%;
+      padding-right: 3%;
+    }
+    .flow-wrap .fw-connector .fw-c-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05));
+    }
+    .flow-wrap .fw-connector .fw-c-arrow {
+      font-size: 0.85em;
+      color: rgba(255,255,255,0.35);
+      line-height: 1;
+    }
+    .flow-wrap .fw-step.client { border-color: rgba(59,130,246,0.3); background: rgba(59,130,246,0.08); }
+    .flow-wrap .fw-step.system { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.08); }
+    .flow-wrap .fw-step.verify { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.06); }
+    .flow-wrap .fw-step.attention { border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.06); }
+
     @media (max-width: 768px) {
       .grid-4 { grid-template-columns: 1fr 1fr; }
       .grid-3, .two-col { grid-template-columns: 1fr; }
@@ -694,19 +751,6 @@
         <span class="c-label">Generaci&oacute;n de estad&iacute;sticas</span>
       </div>
     </div>
-    <!-- X.1: C&oacute;digo - generar y mostrar turno -->
-    <div class="code-output fragment" data-fragment-index="8" style="max-width:650px;margin:0.5rem auto;">
-      <span class="out-line"><span class="out-arrow">==&gt;</span> <span class="out-info">generarTurno(&quot;Cr&eacute;ditos&quot;, &quot;Mar&iacute;a Garc&iacute;a&quot;)</span></span>
-      <span class="out-line"><span class="out-data">  Turno #T006 generado</span></span>
-      <span class="out-line"><span class="out-data">  Cliente: Mar&iacute;a Garc&iacute;a</span></span>
-      <span class="out-line"><span class="out-data">  Tr&aacute;mite: Cr&eacute;ditos  |  Sector: Ventanilla 3</span></span>
-      <span class="out-line"><span class="out-data">  Prioridad: Normal  |  Estado: En cola</span></span>
-      <span class="out-line"><span class="out-arrow">==&gt;</span> <span class="out-info">mostrarCola(colaTurnos)</span></span>
-      <span class="out-line"><span class="out-info">=== COLA DE ATENCI&Oacute;N ===</span></span>
-      <span class="out-line"><span class="out-data">  T006 | Mar&iacute;a Garc&iacute;a     | Cr&eacute;ditos</span></span>
-      <span class="out-line"><span class="out-data">  T001 | Juan P&eacute;rez       | Cr&eacute;ditos</span></span>
-      <span class="out-line"><span class="out-data">  ...</span></span>
-    </div>
   </section>
 
   <!-- 2b. Detalle de soluciones clave -->
@@ -753,61 +797,55 @@
       Beneficios
       <span class="h2-line"></span>
     </h2>
-
-    <!-- Clientes -->
-    <div class="benefit-main client fragment" style="max-width:720px;margin:0 auto 0.5rem;">
-      <div class="bm-icon"><svg class="icon-lg"><use href="#icon-user"/></svg></div>
-      <div class="bm-title">Clientes: Atenci&oacute;n m&aacute;s r&aacute;pida</div>
-      <div class="bm-desc">Reducci&oacute;n significativa de los tiempos de espera y mejora en la experiencia de atenci&oacute;n</div>
-    </div>
-    <div class="sub-benefits fragment" style="max-width:720px;margin:0 auto 0.6rem;">
-      <span class="sub-item"><svg class="icon-sm" style="color:#60a5fa;width:0.9em;height:0.9em;"><use href="#icon-clock"/></svg> Menor tiempo de espera</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#60a5fa;width:0.9em;height:0.9em;"><use href="#icon-bolt"/></svg> Atenci&oacute;n m&aacute;s r&aacute;pida</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#60a5fa;width:0.9em;height:0.9em;"><use href="#icon-heart"/></svg> Mayor comodidad</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#60a5fa;width:0.9em;height:0.9em;"><use href="#icon-ticket"/></svg> Informaci&oacute;n clara del turno</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#60a5fa;width:0.9em;height:0.9em;"><use href="#icon-star"/></svg> Mejor experiencia</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#60a5fa;width:0.9em;height:0.9em;"><use href="#icon-shield"/></svg> Atenci&oacute;n justa y ordenada</span>
-    </div>
-
-    <!-- Empleados -->
-    <div class="benefit-main employee fragment" style="max-width:720px;margin:0 auto 0.5rem;">
-      <div class="bm-icon"><svg class="icon-lg"><use href="#icon-users"/></svg></div>
-      <div class="bm-title">Empleados: Flujo de trabajo m&aacute;s organizado</div>
-      <div class="bm-desc">Optimizaci&oacute;n de la carga laboral y reducci&oacute;n del estr&eacute;s operativo</div>
-    </div>
-    <div class="sub-benefits fragment" style="max-width:720px;margin:0 auto 0.6rem;">
-      <span class="sub-item"><svg class="icon-sm" style="color:#34d399;width:0.9em;height:0.9em;"><use href="#icon-check"/></svg> Menos interrupciones</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#34d399;width:0.9em;height:0.9em;"><use href="#icon-list"/></svg> Flujo de trabajo organizado</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#34d399;width:0.9em;height:0.9em;"><use href="#icon-chart"/></svg> Mayor productividad</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#34d399;width:0.9em;height:0.9em;"><use href="#icon-heart"/></svg> Reducci&oacute;n del estr&eacute;s</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#34d399;width:0.9em;height:0.9em;"><use href="#icon-flow"/></svg> Mejor distribuci&oacute;n de tareas</span>
-    </div>
-
-    <!-- Banco -->
-    <div class="benefit-main bank fragment" style="max-width:720px;margin:0 auto 0.5rem;">
-      <div class="bm-icon"><svg class="icon-lg"><use href="#icon-building"/></svg></div>
-      <div class="bm-title">Banco: Satisfacci&oacute;n del cliente</div>
-      <div class="bm-desc">Mejora de la imagen institucional y eficiencia operativa general</div>
-    </div>
-    <div class="sub-benefits fragment" style="max-width:720px;margin:0 auto 0.6rem;">
-      <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-bolt"/></svg> Optimizaci&oacute;n de recursos</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-building"/></svg> Mejor imagen institucional</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-x-circle"/></svg> Reducci&oacute;n de reclamos</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-chart"/></svg> Estad&iacute;sticas para decisiones</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-target"/></svg> Mejora continua</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-check"/></svg> Mayor eficiencia operativa</span>
-      <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-heart"/></svg> Satisfacci&oacute;n del cliente</span>
-    </div>
-
-    <!-- X.1: C&oacute;digo - mostrar resumen de atenci&oacute;n -->
-    <div class="code-output fragment" style="max-width:650px;margin:0.5rem auto;">
-      <span class="out-line"><span class="out-arrow">==&gt;</span> <span class="out-info">mostrarResumenAtencion(dia)</span></span>
-      <span class="out-line"><span class="out-info">=== RESUMEN DEL D&Iacute;A ===</span></span>
-      <span class="out-line"><span class="out-data">  Clientes atendidos: 47</span></span>
-      <span class="out-line"><span class="out-data">  Tiempo promedio: 12 min</span></span>
-      <span class="out-line"><span class="out-data">  Prioritarios: 8  |  Normales: 39</span></span>
-      <span class="out-line"><span class="out-data">  Reclamos: 0  |  Satisfacci&oacute;n: 96%</span></span>
-      <span class="out-line"><span class="out-info">===========================</span></span>
+    <div class="grid-3" style="gap:0.6rem;max-width:1100px;margin-top:0.3rem;">
+      <!-- Clientes -->
+      <div class="fragment">
+        <div class="benefit-main client" style="margin:0;padding:0.6rem 0.5rem;">
+          <div class="bm-icon"><svg class="icon" style="width:1.5em;height:1.5em;margin:0 auto;"><use href="#icon-user"/></svg></div>
+          <div class="bm-title" style="font-size:0.7em;">Clientes: Atenci&oacute;n m&aacute;s r&aacute;pida</div>
+          <div class="bm-desc">Reducci&oacute;n de tiempos de espera y mejora en la experiencia</div>
+        </div>
+        <div class="sub-benefits" style="margin:0.4rem 0 0;">
+          <span class="sub-item"><svg class="icon-sm" style="color:#60a5fa;width:0.9em;height:0.9em;"><use href="#icon-clock"/></svg> Menor tiempo de espera</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#60a5fa;width:0.9em;height:0.9em;"><use href="#icon-bolt"/></svg> Atenci&oacute;n m&aacute;s r&aacute;pida</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#60a5fa;width:0.9em;height:0.9em;"><use href="#icon-heart"/></svg> Mayor comodidad</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#60a5fa;width:0.9em;height:0.9em;"><use href="#icon-ticket"/></svg> Informaci&oacute;n clara del turno</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#60a5fa;width:0.9em;height:0.9em;"><use href="#icon-star"/></svg> Mejor experiencia</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#60a5fa;width:0.9em;height:0.9em;"><use href="#icon-shield"/></svg> Atenci&oacute;n justa y ordenada</span>
+        </div>
+      </div>
+      <!-- Empleados -->
+      <div class="fragment">
+        <div class="benefit-main employee" style="margin:0;padding:0.6rem 0.5rem;">
+          <div class="bm-icon"><svg class="icon" style="width:1.5em;height:1.5em;margin:0 auto;"><use href="#icon-users"/></svg></div>
+          <div class="bm-title" style="font-size:0.7em;">Empleados: Flujo organizado</div>
+          <div class="bm-desc">Optimizaci&oacute;n de carga laboral y reducci&oacute;n del estr&eacute;s</div>
+        </div>
+        <div class="sub-benefits" style="margin:0.4rem 0 0;">
+          <span class="sub-item"><svg class="icon-sm" style="color:#34d399;width:0.9em;height:0.9em;"><use href="#icon-check"/></svg> Menos interrupciones</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#34d399;width:0.9em;height:0.9em;"><use href="#icon-list"/></svg> Flujo de trabajo organizado</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#34d399;width:0.9em;height:0.9em;"><use href="#icon-chart"/></svg> Mayor productividad</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#34d399;width:0.9em;height:0.9em;"><use href="#icon-heart"/></svg> Reducci&oacute;n del estr&eacute;s</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#34d399;width:0.9em;height:0.9em;"><use href="#icon-flow"/></svg> Mejor distribuci&oacute;n de tareas</span>
+        </div>
+      </div>
+      <!-- Banco -->
+      <div class="fragment">
+        <div class="benefit-main bank" style="margin:0;padding:0.6rem 0.5rem;">
+          <div class="bm-icon"><svg class="icon" style="width:1.5em;height:1.5em;margin:0 auto;"><use href="#icon-building"/></svg></div>
+          <div class="bm-title" style="font-size:0.7em;">Banco: Satisfacci&oacute;n del cliente</div>
+          <div class="bm-desc">Mejora de la imagen institucional y eficiencia operativa</div>
+        </div>
+        <div class="sub-benefits" style="margin:0.4rem 0 0;">
+          <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-bolt"/></svg> Optimizaci&oacute;n de recursos</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-building"/></svg> Mejor imagen institucional</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-x-circle"/></svg> Reducci&oacute;n de reclamos</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-chart"/></svg> Estad&iacute;sticas para decisiones</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-target"/></svg> Mejora continua</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-check"/></svg> Mayor eficiencia operativa</span>
+          <span class="sub-item"><svg class="icon-sm" style="color:#fbbf24;width:0.9em;height:0.9em;"><use href="#icon-heart"/></svg> Satisfacci&oacute;n del cliente</span>
+        </div>
+      </div>
     </div>
   </section>
 </section>
@@ -821,46 +859,53 @@
       Flujo del Sistema
       <span class="h2-line"></span>
     </h2>
-    <p style="font-size:0.4em;opacity:0.5;margin-bottom:0.6rem;">Recorrido del cliente desde que ingresa hasta que es atendido</p>
 
-    <div class="flow-v2">
-      <div class="f2-step client">
-        <span class="f2-icon"><svg class="icon"><use href="#icon-user"/></svg></span>
-        <span class="f2-text">Ingreso del cliente</span>
+    <div class="flow-wrap">
+      <!-- Fila 1 -->
+      <div class="fw-row">
+        <div class="fw-step client">
+          <svg class="fwi"><use href="#icon-user"/></svg>
+          Ingreso
+        </div>
+        <span class="fw-arrow">&rarr;</span>
+        <div class="fw-step system">
+          <svg class="fwi"><use href="#icon-id"/></svg>
+          Sistema de turnos <span class="fws">DNI + tr&aacute;mite</span>
+        </div>
+        <span class="fw-arrow">&rarr;</span>
+        <div class="fw-step system">
+          <svg class="fwi"><use href="#icon-ticket"/></svg>
+          Emisi&oacute;n de turno <span class="fws">sector + n&uacute;mero</span>
+        </div>
+        <span class="fw-arrow">&rarr;</span>
+        <div class="fw-step verify">
+          <svg class="fwi"><use href="#icon-shield"/></svg>
+          Verifica prioridad
+        </div>
+        <span class="fw-arrow">&rarr;</span>
       </div>
-      <span class="f2-arrow">&darr;</span>
-      <div class="f2-step system">
-        <span class="f2-icon"><svg class="icon"><use href="#icon-id"/></svg></span>
-        <span class="f2-text">Sistema de turnos<br><span class="f2-sub">DNI + selecci&oacute;n de tr&aacute;mite</span></span>
-      </div>
-      <span class="f2-arrow">&darr;</span>
-      <div class="f2-step system">
-        <span class="f2-icon"><svg class="icon"><use href="#icon-ticket"/></svg></span>
-        <span class="f2-text">Emisi&oacute;n de turno<br><span class="f2-sub">cliente, sector y n&uacute;mero</span></span>
-      </div>
-      <span class="f2-arrow">&darr;</span>
-      <div class="f2-step verify">
-        <span class="f2-icon"><svg class="icon"><use href="#icon-shield"/></svg></span>
-        <span class="f2-text">Verifica prioridad</span>
-      </div>
-      <span class="f2-arrow">&darr;</span>
-      <div class="f2-step system">
-        <span class="f2-icon"><svg class="icon"><use href="#icon-list"/></svg></span>
-        <span class="f2-text">Cola y espera</span>
-      </div>
-      <span class="f2-arrow">&darr;</span>
-      <div class="f2-step system">
-        <span class="f2-icon"><svg class="icon"><use href="#icon-monitor"/></svg></span>
-        <span class="f2-text">Llamado<br><span class="f2-sub">listas de turno en pantalla</span></span>
-      </div>
-      <span class="f2-arrow">&darr;</span>
-      <div class="f2-step attention">
-        <span class="f2-icon"><svg class="icon"><use href="#icon-check-circle"/></svg></span>
-        <span class="f2-text">Atenci&oacute;n</span>
+
+      <!-- Fila 2 -->
+      <div class="fw-row fw-row2">
+        <span class="fw-arrow">&larr;</span>
+        <div class="fw-step system">
+          <svg class="fwi"><use href="#icon-list"/></svg>
+          Cola y espera
+        </div>
+        <span class="fw-arrow">&rarr;</span>
+        <div class="fw-step system">
+          <svg class="fwi"><use href="#icon-monitor"/></svg>
+          Llamado <span class="fws">pantalla de turnos</span>
+        </div>
+        <span class="fw-arrow">&rarr;</span>
+        <div class="fw-step attention">
+          <svg class="fwi"><use href="#icon-check-circle"/></svg>
+          Atenci&oacute;n
+        </div>
       </div>
     </div>
 
-    <div class="legend" style="margin-top:0.8rem;">
+    <div class="legend" style="margin-top:0.5rem;">
       <span class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span> Cliente</span>
       <span class="legend-item"><span class="legend-dot" style="background:#10b981;"></span> Sistema</span>
       <span class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span> Verificaci&oacute;n</span>
@@ -1108,6 +1153,57 @@ void insertarPrioridad(Nodo[] cola,
     autoAnimateEasing: 'ease-out',
     autoAnimateDuration: 0.8,
   });
+
+  /* ── Control remoto vía WebSocket ── */
+  (function() {
+    var proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var url = proto + '//' + window.location.host;
+    var ws = null;
+    var reconnectTimer = null;
+
+    function connect() {
+      ws = new WebSocket(url);
+      ws.onopen = function() {
+        ws.send(JSON.stringify({ type: 'display' }));
+        sendSlideInfo();
+        if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+      };
+      ws.onclose = function() { scheduleReconnect(); };
+      ws.onerror = function() { ws.close(); };
+      ws.onmessage = function(e) {
+        var msg;
+        try { msg = JSON.parse(e.data); } catch { return; }
+        if (msg.action === 'right')    { Reveal.right(); sendSlideInfo(); }
+        if (msg.action === 'left')     { Reveal.left();  sendSlideInfo(); }
+        if (msg.action === 'up')       { Reveal.up();    sendSlideInfo(); }
+        if (msg.action === 'down')     { Reveal.down();  sendSlideInfo(); }
+        if (msg.action === 'slide')    { Reveal.slide(msg.index); sendSlideInfo(); }
+      };
+    }
+
+    function sendSlideInfo() {
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      var indices = Reveal.getIndices();
+      ws.send(JSON.stringify({
+        type: 'slideInfo',
+        index: (indices.h || 0) + 1,
+        total: Reveal.getTotalSlides()
+      }));
+    }
+
+    function scheduleReconnect() {
+      if (reconnectTimer) return;
+      reconnectTimer = setTimeout(function() {
+        reconnectTimer = null;
+        connect();
+      }, 2000);
+    }
+
+    connect();
+
+    /* Notify slide info on each slide change */
+    Reveal.on('slidechanged', sendSlideInfo);
+  })();
 </script>
 </body>
 </html>

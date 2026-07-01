@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Control Remoto</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      background: #0b1120;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      min-height: 100vh;
+      padding: 1rem;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow: hidden;
+    }
+    h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      opacity: 0.5;
+      margin-bottom: 1rem;
+      letter-spacing: 0.05em;
+    }
+    .status {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 20px;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .status.connected { background: rgba(16,185,129,0.15); color: #34d399; }
+    .status.connecting { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .status.disconnected { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+    .dpad {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
+      gap: 0.6rem;
+      width: 100%;
+      max-width: 320px;
+      aspect-ratio: 1 / 1;
+    }
+    .dpad .empty { visibility: hidden; }
+
+    .btn {
+      border: none;
+      border-radius: 16px;
+      font-size: 2.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.08s, opacity 0.08s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      aspect-ratio: 1 / 1;
+    }
+    .btn:active {
+      transform: scale(0.88);
+      opacity: 0.6;
+    }
+
+    .btn-up    { background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2); grid-column: 2; grid-row: 1; }
+    .btn-down  { background: rgba(139,92,246,0.12); color: #a78bfa; border: 1px solid rgba(139,92,246,0.2); grid-column: 2; grid-row: 3; }
+    .btn-prev  { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.2); grid-column: 1; grid-row: 2; }
+    .btn-next  { background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(16,185,129,0.2); grid-column: 3; grid-row: 2; }
+
+    .slide-info {
+      font-size: 0.8rem;
+      opacity: 0.35;
+      margin-top: 1.2rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .footer {
+      margin-top: 0.8rem;
+      font-size: 0.55rem;
+      opacity: 0.2;
+    }
+
+    @media (max-width: 360px) {
+      .btn { font-size: 2.2rem; }
+      .dpad { max-width: 260px; }
+    }
+    @media (min-height: 800px) {
+      .btn { font-size: 3.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Control Remoto</h1>
+  <div class="status disconnected" id="status">Desconectado</div>
+
+  <div class="dpad" id="dpad">
+    <div class="empty"></div>
+    <button class="btn btn-up"    id="btnUp">&#9650;</button>
+    <div class="empty"></div>
+    <button class="btn btn-prev"  id="btnPrev">&#9664;</button>
+    <div class="empty"></div>
+    <button class="btn btn-next"  id="btnNext">&#9654;</button>
+    <div class="empty"></div>
+    <button class="btn btn-down"  id="btnDown">&#9660;</button>
+    <div class="empty"></div>
+  </div>
+
+  <div class="slide-info" id="slideInfo">---</div>
+  <div class="footer">desliz&aacute; para navegar</div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const slideInfo = document.getElementById('slideInfo');
+    const btnUp = document.getElementById('btnUp');
+    const btnDown = document.getElementById('btnDown');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+
+    let ws = null;
+    let reconnectTimer = null;
+
+    function connect() {
+      setStatus('connecting', 'Conectando...');
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const url = proto + '//' + window.location.host;
+
+      ws = new WebSocket(url);
+      ws.onopen = () => {
+        setStatus('connected', 'Conectado');
+        ws.send(JSON.stringify({ type: 'controller' }));
+        if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+      };
+      ws.onclose = () => {
+        setStatus('disconnected', 'Desconectado');
+        scheduleReconnect();
+      };
+      ws.onerror = () => ws.close();
+      ws.onmessage = (e) => {
+        try {
+          const msg = JSON.parse(e.data);
+          if (msg.type === 'slideInfo') {
+            slideInfo.textContent = 'Diapositiva ' + msg.index + ' / ' + msg.total;
+          }
+        } catch {}
+      };
+    }
+
+    function setStatus(cls, text) {
+      statusEl.className = 'status ' + cls;
+      statusEl.textContent = text;
+    }
+
+    function scheduleReconnect() {
+      if (reconnectTimer) return;
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        connect();
+      }, 2000);
+    }
+
+    function send(action) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action }));
+      }
+    }
+
+    btnUp.addEventListener('click',   () => send('up'));
+    btnDown.addEventListener('click', () => send('down'));
+    btnPrev.addEventListener('click', () => send('left'));
+    btnNext.addEventListener('click', () => send('right'));
+
+    /* Swipe gestures: horizontal for prev/next, vertical for up/down */
+    (function() {
+      let startX = 0, startY = 0;
+      document.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      }, { passive: true });
+      document.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+        if (Math.max(absDx, absDy) < 50) return;
+
+        if (absDx > absDy) {
+          send(dx > 0 ? 'left' : 'right');
+        } else {
+          send(dy > 0 ? 'down' : 'up');
+        }
+      }, { passive: true });
+    })();
+
+    connect();
+  </script>
+</body>
+</html>
